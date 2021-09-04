@@ -67,7 +67,7 @@ namespace ProjectAmy.ClientWorker
                     ChangeType = "created",
                     NotificationUrl = Program.FunctionsEndpoint,
                     Resource = $"/teams/{Program.TeamId}/channels/{Program.ChannelId}/messages",
-                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromDays(30),
+                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
                     //ClientState = "secretClientValue",
                     LatestSupportedTlsVersion = "v1_2"
                 };
@@ -75,6 +75,8 @@ namespace ProjectAmy.ClientWorker
                 await _graphServiceClient.Subscriptions
                     .Request()
                     .AddAsync(subscription, stoppingToken);
+
+                _logger.LogInformation("Successfully created subscription");
             }
             catch (Exception e)
             {
