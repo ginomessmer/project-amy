@@ -16,7 +16,7 @@ namespace ProjectAmy.ClientWorker
 
         public static IEnumerable<string> Scopes = new[] { "ChannelMessage.Read.All" };
 
-        public const string FunctionsEndpoint = "https://project-amy.azurewebsites.net/api/Notification?key=LKo9aT1Jc1FHhYQVXbgJJCSWZq0XuBfkzu9HHaNPOVuO8sjX92VzPw=="; // TODO: Change key
+        public const string FunctionsEndpoint = "https://project-amy.azurewebsites.net/api/Notification?code=LKo9aT1Jc1FHhYQVXbgJJCSWZq0XuBfkzu9HHaNPOVuO8sjX92VzPw=="; // TODO: Change key
         public const string TeamId = "1047af6d-3a4b-4270-97c5-8694e61582e5";
         public const string ChannelId = "19:ozBKIey0-SsHoj8F9f2-U6cKbdZ3FOHxupLR2kDIxww1@thread.tacv2";
 
