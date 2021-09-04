@@ -69,7 +69,8 @@ namespace ProjectAmy.ClientWorker
                     Resource = $"/teams/{Program.TeamId}/channels/{Program.ChannelId}/messages",
                     ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
                     //ClientState = "secretClientValue",
-                    LatestSupportedTlsVersion = "v1_2"
+                    LatestSupportedTlsVersion = "v1_2",
+                    IncludeResourceData = true
                 };
 
                 await _graphServiceClient.Subscriptions
