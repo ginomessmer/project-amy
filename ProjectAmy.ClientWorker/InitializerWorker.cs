@@ -70,7 +70,8 @@ namespace ProjectAmy.ClientWorker
                     ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
                     //ClientState = "secretClientValue",
                     LatestSupportedTlsVersion = "v1_2",
-                    IncludeResourceData = true
+                    //IncludeResourceData = true,
+                    // TODO certificate needed for IncludeResourceData
                 };
 
                 await _graphServiceClient.Subscriptions

@@ -21,12 +21,7 @@ namespace ProjectAmy.Server
 {
     public class Notification
     {
-        private readonly ILogger _logger;
-
-        Notification(ILogger logger)
-        {
-            _logger = logger;
-        }
+       
         [FunctionName(nameof(Notification))]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
@@ -39,7 +34,7 @@ namespace ProjectAmy.Server
             } else
             {
                 var changeNotifications = await ParseNotificationAsync(req);
-                return HandleNotificationReceived(changeNotifications);
+                return HandleNotificationReceived(changeNotifications, log);
             }
             
         }
@@ -67,10 +62,10 @@ namespace ProjectAmy.Server
             return await System.Text.Json.JsonSerializer.DeserializeAsync<ChangeNotificationCollection>(request.Body, options);
         }
 
-        private IActionResult HandleNotificationReceived(ChangeNotificationCollection changeNotifications)
+        private IActionResult HandleNotificationReceived(ChangeNotificationCollection changeNotifications, ILogger logger)
         {
 
-            _logger.LogInformation("handle notification {notifications}", changeNotifications);
+            logger.LogInformation("handle notification {notifications}", changeNotifications);
             return new OkObjectResult("");
             
         }
