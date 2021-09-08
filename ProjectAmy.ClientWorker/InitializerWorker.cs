@@ -72,7 +72,8 @@ namespace ProjectAmy.ClientWorker
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
                     EncryptionCertificate = Program.PublicKey,
-                    EncryptionCertificateId = "graph-change-notification-cert"
+                    EncryptionCertificateId = "graph-change-notification-cert",
+                    
                 };
 
                 await _graphServiceClient.Subscriptions
