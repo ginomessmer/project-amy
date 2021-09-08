@@ -42,7 +42,13 @@ namespace ProjectAmy.ClientWorker
                 _logger.LogInformation("Sign-in successful!");
             }
 
-            // Check subscriptions
+            // Check and create subscriptions
+            await CheckSubscriptionsAsync(stoppingToken);
+            await CreateSubscriptionAsync(stoppingToken);
+        }
+
+        private async Task CheckSubscriptionsAsync(CancellationToken stoppingToken)
+        {
             try
             {
                 var subscriptions = await _graphServiceClient.Subscriptions.Request()
@@ -50,8 +56,6 @@ namespace ProjectAmy.ClientWorker
                     .GetAsync(stoppingToken);
 
                 _logger.LogInformation("Found {subscriptions}", subscriptions.Count);
-                
-                await CreateSubscriptionAsync(stoppingToken);
             }
             catch (Exception ex)
             {
@@ -73,8 +77,7 @@ namespace ProjectAmy.ClientWorker
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
                     EncryptionCertificate = _options.PublicKey,
-                    EncryptionCertificateId = "graph-change-notification-cert",
-                    
+                    EncryptionCertificateId = "graph-change-notification-cert"
                 };
 
                 await _graphServiceClient.Subscriptions
