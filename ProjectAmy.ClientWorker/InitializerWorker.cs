@@ -46,10 +46,10 @@ namespace ProjectAmy.ClientWorker
 
                 _logger.LogInformation("Found {subscriptions}", subscriptions.Count);
 
-                if (!subscriptions.Any())
-                {
+               // if (!subscriptions.Any())
+                //{
                     await CreateSubscriptionAsync(stoppingToken);
-                }
+                //}
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ namespace ProjectAmy.ClientWorker
                 // Register subscription if required
                 var subscription = new Subscription
                 {
-                    ChangeType = "created",
+                    ChangeType = "updated",
                     NotificationUrl = Program.FunctionsEndpoint,
                     Resource = $"/teams/{Program.TeamId}/channels/{Program.ChannelId}/messages",
                     ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
