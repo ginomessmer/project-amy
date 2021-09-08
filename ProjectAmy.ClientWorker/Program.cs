@@ -45,6 +45,7 @@ namespace ProjectAmy.ClientWorker
                         })));
 
                     services.AddHostedService<InitializerWorker>();
+                    services.AddHostedService<KeyboardReactionsWorker>();
                 });
     }
 }
