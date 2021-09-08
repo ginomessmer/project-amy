@@ -70,15 +70,6 @@ namespace ProjectAmy.ClientWorker
             try
             {
                 string base64PublicKey;
-                string publicKey;
-                using (FileStream fs = new FileStream(Program.PublicKeyPath, FileMode.Open))
-                {
-                    using (StreamReader stringReader = new StreamReader(fs))
-                    {
-                        publicKey = stringReader.ReadToEnd();
-                    }
-
-                }
                 using (FileStream fs = new FileStream(Program.PublicKeyPath, FileMode.Open))
                 {
                     using (BinaryReader binaryReader = new BinaryReader(fs))
@@ -87,12 +78,8 @@ namespace ProjectAmy.ClientWorker
                         base64PublicKey = Convert.ToBase64String(bytes, 0, bytes.Length);
                     }
                 }
-
-                var key = Convert.ToBase64String(Encoding.Default.GetBytes(Program.PublicKey));
-                _logger.LogInformation(key);
                 _logger.LogInformation(base64PublicKey);
 
-                _logger.LogInformation(publicKey);
 
                 // Register subscription if required
                 var subscription = new Subscription
@@ -100,7 +87,7 @@ namespace ProjectAmy.ClientWorker
                     ChangeType = "updated",
                     NotificationUrl = _options.FunctionsNotificationsEndpoint,
                     Resource = $"/teams/{_options.TeamId}/channels/{_options.ChannelId}/messages",
-                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
+                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromMinutes(2) /*TimeSpan.FromHours(1)*/,
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
                     EncryptionCertificate = base64PublicKey,
