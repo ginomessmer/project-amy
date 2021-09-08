@@ -34,7 +34,7 @@ namespace ProjectAmy.Server
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation(JsonConvert.SerializeObject(req));
+            log.LogInformation(JsonConvert.SerializeObject(req.Body));
             var validationToken = req.Query["validationToken"];
             if (validationToken.Any())
             {

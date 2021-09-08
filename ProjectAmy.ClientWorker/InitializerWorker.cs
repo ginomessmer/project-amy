@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
+using System.Text;
+using System.IO;
 
 namespace ProjectAmy.ClientWorker
 {
@@ -61,6 +63,31 @@ namespace ProjectAmy.ClientWorker
         {
             try
             {
+                string base64PublicKey;
+                string publicKey;
+                using (FileStream fs = new FileStream(Program.PublicKeyPath, FileMode.Open))
+                {
+                    using (StreamReader stringReader = new StreamReader(fs))
+                    {
+                        publicKey = stringReader.ReadToEnd();
+                    }
+
+                }
+                using (FileStream fs = new FileStream(Program.PublicKeyPath, FileMode.Open))
+                {
+                    using (BinaryReader binaryReader = new BinaryReader(fs))
+                    {
+                        Byte[] bytes = binaryReader.ReadBytes((Int32)fs.Length);
+                        base64PublicKey = Convert.ToBase64String(bytes, 0, bytes.Length);
+                    }
+                }
+
+                var key = Convert.ToBase64String(Encoding.Default.GetBytes(Program.PublicKey));
+                _logger.LogInformation(key);
+                _logger.LogInformation(base64PublicKey);
+
+                _logger.LogInformation(publicKey);
+
                 // Register subscription if required
                 var subscription = new Subscription
                 {
@@ -71,7 +98,7 @@ namespace ProjectAmy.ClientWorker
                     //ClientState = "secretClientValue",
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
-                    EncryptionCertificate = Program.PublicKey,
+                    EncryptionCertificate = base64PublicKey,
                     EncryptionCertificateId = "graph-change-notification-cert",
                     
                 };
