@@ -1,11 +1,8 @@
 ﻿using Azure.Identity;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProjectAmy.Server;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Azure.Security.KeyVault.Keys;
 
 [assembly: FunctionsStartup(typeof(Startup))]
