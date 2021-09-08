@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
+using ProjectAmy.ClientWorker.Options;
 
 namespace ProjectAmy.ClientWorker
 {
@@ -15,11 +17,14 @@ namespace ProjectAmy.ClientWorker
         private readonly ILogger<InitializerWorker> _logger;
         private readonly IPublicClientApplication _app;
         private readonly GraphServiceClient _graphServiceClient;
+        private readonly AmyClientOptions _options;
 
         public InitializerWorker(ILogger<InitializerWorker> logger,
+            IOptions<AmyClientOptions> options,
             IPublicClientApplication app, GraphServiceClient graphServiceClient)
         {
             _logger = logger;
+            _options = options.Value;
             _app = app;
             _graphServiceClient = graphServiceClient;
         }
@@ -41,15 +46,12 @@ namespace ProjectAmy.ClientWorker
             try
             {
                 var subscriptions = await _graphServiceClient.Subscriptions.Request()
-                    //.Filter($"startsWith(notificationUrl,'{Program.FunctionsEndpoint}')")
+                    // TODO: Figure out how to filter
                     .GetAsync(stoppingToken);
 
                 _logger.LogInformation("Found {subscriptions}", subscriptions.Count);
-
-               // if (!subscriptions.Any())
-                //{
-                    await CreateSubscriptionAsync(stoppingToken);
-                //}
+                
+                await CreateSubscriptionAsync(stoppingToken);
             }
             catch (Exception ex)
             {
@@ -65,13 +67,12 @@ namespace ProjectAmy.ClientWorker
                 var subscription = new Subscription
                 {
                     ChangeType = "updated",
-                    NotificationUrl = Program.FunctionsEndpoint,
-                    Resource = $"/teams/{Program.TeamId}/channels/{Program.ChannelId}/messages",
+                    NotificationUrl = _options.FunctionsNotificationsEndpoint,
+                    Resource = $"/teams/{_options.TeamId}/channels/{_options.ChannelId}/messages",
                     ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
-                    //ClientState = "secretClientValue",
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
-                    EncryptionCertificate = Program.PublicKey,
+                    EncryptionCertificate = _options.PublicKey,
                     EncryptionCertificateId = "graph-change-notification-cert",
                     
                 };
