@@ -13,12 +13,19 @@ using System.Text.Json.Serialization;
 using Microsoft.Graph;
 using System.IO;
 using Newtonsoft.Json;
+using Azure.Security.KeyVault.Keys;
 
 namespace ProjectAmy.Server
 {
     public class Notification
     {
-       
+        private KeyClient _keyClient;
+
+        public Notification(KeyClient keyClient)
+        {
+            _keyClient = keyClient;
+        }
+
         [FunctionName(nameof(Notification))]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
@@ -61,7 +68,7 @@ namespace ProjectAmy.Server
 
         private IActionResult HandleNotificationReceived(ChangeNotificationCollection changeNotifications, ILogger logger)
         {
-
+            logger.LogInformation(_keyClient.VaultUri.ToString());
             logger.LogInformation("handle notification:");
             logger.LogInformation(JsonConvert.SerializeObject(changeNotifications));
             return new OkObjectResult("");
