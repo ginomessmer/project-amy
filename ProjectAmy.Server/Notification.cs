@@ -8,11 +8,12 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
-using Microsoft.Graph;
 using System.IO;
-using Newtonsoft.Json;
+using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using System.Security.Cryptography;
+using Microsoft.Graph;
+using Newtonsoft.Json;
 
 namespace ProjectAmy.Server
 {
@@ -76,6 +77,7 @@ namespace ProjectAmy.Server
                 if (dataKey != null)
                 {
                     var dataKeyBytes = Convert.FromBase64String(dataKey.ToString());
+                    logger.LogInformation("dataKeyBytes");
                     DecryptParameters decryptParameters = DecryptParameters.RsaOaepParameters(dataKeyBytes);
                     DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(decryptParameters);
 
@@ -86,6 +88,8 @@ namespace ProjectAmy.Server
                     using (HMACSHA256 hmac = new HMACSHA256(decryptedKey.Plaintext))
                     {
                         actualSignature = hmac.ComputeHash(encryptedPayload);
+                        logger.LogInformation("actualSignature");
+
                     }
                     if (actualSignature.SequenceEqual(expectedSignature))
                     {
@@ -101,18 +105,27 @@ namespace ProjectAmy.Server
                         byte[] iv = new byte[vectorSize];
                         Array.Copy(decryptedKey.Plaintext, iv, vectorSize);
                         aesProvider.IV = iv;
+                        logger.LogInformation("Obtained the intialization vector from the symmetric key itself");
 
 
                         string decryptedResourceData;
                         // Decrypt the resource data content.
                         using (var decryptor = aesProvider.CreateDecryptor())
                         {
+                            logger.LogInformation("decryptor ready");
+
                             using (MemoryStream msDecrypt = new MemoryStream(encryptedPayload))
                             {
+                                logger.LogInformation("memory stram ready");
+
                                 using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                                 {
+                                    logger.LogInformation("crypto stream ready");
+
                                     using (StreamReader srDecrypt = new StreamReader(csDecrypt))
                                     {
+                                        logger.LogInformation("stream reader ready");
+
                                         decryptedResourceData = srDecrypt.ReadToEnd();
                                         logger.LogInformation("handle notification:");
                                         logger.LogInformation(JsonConvert.SerializeObject(decryptedResourceData));
