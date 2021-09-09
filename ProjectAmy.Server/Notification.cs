@@ -8,14 +8,10 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Graph;
 using System.IO;
 using Newtonsoft.Json;
-using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
-using System.Text;
 using System.Security.Cryptography;
 
 namespace ProjectAmy.Server
@@ -63,11 +59,11 @@ namespace ProjectAmy.Server
 
         private async Task<ChangeNotificationCollection> ParseNotificationAsync(HttpRequest request)
         {
-            var options = new JsonSerializerOptions
+            /*var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
-            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));*/
             string requestBody = await new StreamReader(request.Body).ReadToEndAsync();
             return JsonConvert.DeserializeObject<ChangeNotificationCollection>(requestBody);
         }
