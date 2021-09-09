@@ -78,8 +78,10 @@ namespace ProjectAmy.Server
                 {
                     var dataKeyBytes = Convert.FromBase64String(dataKey.ToString());
                     logger.LogInformation("dataKeyBytes");
-                    DecryptParameters decryptParameters = DecryptParameters.RsaOaepParameters(dataKeyBytes);
-                    DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(decryptParameters);
+                    /*DecryptParameters decryptParameters = DecryptParameters.RsaOaepParameters(dataKeyBytes);
+                    DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(decryptParameters);*/
+                    DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(EncryptionAlgorithm.RsaOaep, dataKeyBytes);
+
 
                     byte[] encryptedPayload = Convert.FromBase64String(changeNotification.EncryptedContent.Data);
                     byte[] expectedSignature = Convert.FromBase64String(changeNotification.EncryptedContent.DataSignature);
