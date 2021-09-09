@@ -15,8 +15,11 @@ namespace ProjectAmy.ClientWorker
     public class Program
     {
 
-        public static IEnumerable<string> Scopes = new[] { "ChannelMessage.Read.All" };
-
+        /*
+         * Likely will not work, because subscribing to messages at channel level does not work with delegated permission and include resource data. It only works with application permission
+         * public static IEnumerable<string> Scopes = new[] { "ChannelMessage.Read.All" };
+        */
+        public static IEnumerable<string> Scopes = new[] { "Chat.Read", "User.Read" };
         public const string PublicKeyPath = "C:\\Users\\Malte\\cert.pem";
 
         public static void Main(string[] args)

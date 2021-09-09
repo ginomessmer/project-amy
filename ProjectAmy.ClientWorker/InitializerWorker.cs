@@ -40,10 +40,9 @@ namespace ProjectAmy.ClientWorker
                 // Sign in
                 var result = await _app.AcquireTokenInteractive(Program.Scopes)
                     .ExecuteAsync(stoppingToken);
-
-                _logger.LogInformation("Sign-in successful!");
+                 _logger.LogInformation("Sign-in successful!");
             }
-
+            
             // Check and create subscriptions
             await CheckSubscriptionsAsync(stoppingToken);
             await CreateSubscriptionAsync(stoppingToken);
@@ -80,14 +79,16 @@ namespace ProjectAmy.ClientWorker
                 }
                 _logger.LogInformation(base64PublicKey);
 
-
+                var loggedInUser = await _graphServiceClient.Me.Request().GetAsync();
+                
                 // Register subscription if required
                 var subscription = new Subscription
                 {
                     ChangeType = "updated",
                     NotificationUrl = _options.FunctionsNotificationsEndpoint,
-                    Resource = $"/teams/{_options.TeamId}/channels/{_options.ChannelId}/messages",
-                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromMinutes(2) /*TimeSpan.FromHours(1)*/,
+                    //Resource = $"/teams/{_options.TeamId}/channels/{_options.ChannelId}/messages",
+                    Resource = $"users/{loggedInUser.Id}/chats/getAllMessages",
+                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromMinutes(10) /*TimeSpan.FromHours(1)*/,
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
                     EncryptionCertificate = base64PublicKey,
