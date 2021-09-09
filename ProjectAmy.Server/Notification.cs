@@ -74,70 +74,74 @@ namespace ProjectAmy.Server
 
         private async Task<IActionResult> HandleNotificationReceivedAsync(ChangeNotificationCollection changeNotifications, ILogger logger)
         {
-            var dataKey = changeNotifications.AdditionalData["dataKey"];
-            if(dataKey != null)
+            foreach(ChangeNotification changeNotification in changeNotifications.Value)
             {
-                var dataKeyBytes = Convert.FromBase64String(dataKey.ToString());
-                DecryptParameters decryptParameters = DecryptParameters.RsaOaepParameters(dataKeyBytes);
-                DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(decryptParameters);
-
-                byte[] encryptedPayload = Convert.FromBase64String(changeNotifications.AdditionalData["data"].ToString());
-                byte[] expectedSignature = Convert.FromBase64String(changeNotifications.AdditionalData["dataSignature"].ToString()) ;
-                byte[] actualSignature;
-
-                using (HMACSHA256 hmac = new HMACSHA256(decryptedKey.Plaintext))
+                   var dataKey = changeNotification.EncryptedContent.DataKey;
+                if (dataKey != null)
                 {
-                    actualSignature = hmac.ComputeHash(encryptedPayload);
-                }
-                if (actualSignature.SequenceEqual(expectedSignature))
-                {
-                    // Continue with decryption of the encryptedPayload.
+                    var dataKeyBytes = Convert.FromBase64String(dataKey.ToString());
+                    DecryptParameters decryptParameters = DecryptParameters.RsaOaepParameters(dataKeyBytes);
+                    DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(decryptParameters);
 
-                    AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider();
-                    aesProvider.Key = decryptedKey.Plaintext;
-                    aesProvider.Padding = PaddingMode.PKCS7;
-                    aesProvider.Mode = CipherMode.CBC;
+                    byte[] encryptedPayload = Convert.FromBase64String(changeNotification.EncryptedContent.Data);
+                    byte[] expectedSignature = Convert.FromBase64String(changeNotification.EncryptedContent.DataSignature);
+                    byte[] actualSignature;
 
-                    // Obtain the intialization vector from the symmetric key itself.
-                    int vectorSize = 16;
-                    byte[] iv = new byte[vectorSize];
-                    Array.Copy(decryptedKey.Plaintext, iv, vectorSize);
-                    aesProvider.IV = iv;
-
-
-                    string decryptedResourceData;
-                    // Decrypt the resource data content.
-                    using (var decryptor = aesProvider.CreateDecryptor())
+                    using (HMACSHA256 hmac = new HMACSHA256(decryptedKey.Plaintext))
                     {
-                        using (MemoryStream msDecrypt = new MemoryStream(encryptedPayload))
+                        actualSignature = hmac.ComputeHash(encryptedPayload);
+                    }
+                    if (actualSignature.SequenceEqual(expectedSignature))
+                    {
+                        // Continue with decryption of the encryptedPayload.
+
+                        AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider();
+                        aesProvider.Key = decryptedKey.Plaintext;
+                        aesProvider.Padding = PaddingMode.PKCS7;
+                        aesProvider.Mode = CipherMode.CBC;
+
+                        // Obtain the intialization vector from the symmetric key itself.
+                        int vectorSize = 16;
+                        byte[] iv = new byte[vectorSize];
+                        Array.Copy(decryptedKey.Plaintext, iv, vectorSize);
+                        aesProvider.IV = iv;
+
+
+                        string decryptedResourceData;
+                        // Decrypt the resource data content.
+                        using (var decryptor = aesProvider.CreateDecryptor())
                         {
-                            using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                            using (MemoryStream msDecrypt = new MemoryStream(encryptedPayload))
                             {
-                                using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                                 {
-                                    decryptedResourceData = srDecrypt.ReadToEnd();
-                                    logger.LogInformation("handle notification:");
-                                    logger.LogInformation(JsonConvert.SerializeObject(decryptedResourceData));
+                                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                                    {
+                                        decryptedResourceData = srDecrypt.ReadToEnd();
+                                        logger.LogInformation("handle notification:");
+                                        logger.LogInformation(JsonConvert.SerializeObject(decryptedResourceData));
+                                    }
                                 }
                             }
                         }
+
+                        // decryptedResourceData now contains a JSON string that represents the resource.
+                    }
+                    else
+                    {
+                        // Do not attempt to decrypt encryptedPayload. Assume notification payload has been tampered with and investigate.
+                        return new StatusCodeResult(StatusCodes.Status500InternalServerError);
                     }
 
-                    // decryptedResourceData now contains a JSON string that represents the resource.
-                }
-                else
-                {
-                    // Do not attempt to decrypt encryptedPayload. Assume notification payload has been tampered with and investigate.
-                    return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-                }
 
-               
-                return new OkObjectResult("");
+                    return new OkObjectResult("");
+
+                }
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+
 
             }
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError); 
-
-
+            return new OkObjectResult("");
         }
 
 
