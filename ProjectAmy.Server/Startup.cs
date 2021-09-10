@@ -28,6 +28,8 @@ namespace ProjectAmy.Server
 
             String keyVaultDecryptionKeyUrl = builder.GetContext().Configuration["AZURE_KEY_VAULT_DECRYPTION_KEY_URL"];
 
+           // var client = new CertificateClient(vaultUri: new Uri(keyVaultDecryptionKeyUrl), credential: new DefaultAzureCredential());
+
             // Create a new cryptography client using the default credential from Azure.Identity using environment variables previously set,
             // including AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID.
             var cryptoClient = new CryptographyClient(keyId: new Uri(keyVaultDecryptionKeyUrl), credential: new DefaultAzureCredential());

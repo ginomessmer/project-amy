@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
 using System.IO;
-using Azure.Security.KeyVault.Keys;
-using Azure.Security.KeyVault.Keys.Cryptography;
 using System.Security.Cryptography;
 using Microsoft.Graph;
 using Newtonsoft.Json;
+using Azure.Security.KeyVault.Keys.Cryptography;
+using Azure.Identity;
 
 namespace ProjectAmy.Server
 {
@@ -41,7 +41,7 @@ namespace ProjectAmy.Server
 
                 var changeNotifications = await ParseNotificationAsync(req);
                 log.LogInformation(JsonConvert.SerializeObject(changeNotifications));
-                return await HandleNotificationReceivedAsync(changeNotifications, log);
+                return /*await*/ HandleNotificationReceivedAsync(changeNotifications, log);
             }
             
         }
@@ -69,19 +69,23 @@ namespace ProjectAmy.Server
             return JsonConvert.DeserializeObject<ChangeNotificationCollection>(requestBody);
         }
 
-        private async Task<IActionResult> HandleNotificationReceivedAsync(ChangeNotificationCollection changeNotifications, ILogger logger)
+        private /*async Task<IActionResult>*/ IActionResult HandleNotificationReceivedAsync(ChangeNotificationCollection changeNotifications, ILogger logger)
         {
             foreach(ChangeNotification changeNotification in changeNotifications.Value)
             {
+                
                    var dataKey = changeNotification.EncryptedContent.DataKey;
                 if (dataKey != null)
                 {
                     var dataKeyBytes = Convert.FromBase64String(dataKey.ToString());
                     logger.LogInformation("dataKeyBytes");
-                    /*DecryptParameters decryptParameters = DecryptParameters.RsaOaepParameters(dataKeyBytes);
-                    DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(decryptParameters);*/
-                    DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(EncryptionAlgorithm.RsaOaep, dataKeyBytes);
+                    DecryptParameters decryptParameters = DecryptParameters.RsaOaepParameters(dataKeyBytes);
 
+                    //DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(decryptParameters);
+                    var cryptoClient = new CryptographyClient(keyId: new Uri("https://project-amy-key-vault.vault.azure.net/keys/graph-encryption-cert/32df986fc8fc4005915bb49d262b257a"), credential: new DefaultAzureCredential());
+
+                    DecryptResult decryptedKey = cryptoClient.Decrypt(decryptParameters);
+                    //DecryptResult decryptedKey = await _cryptoClient.DecryptAsync(EncryptionAlgorithm.RsaOaep, dataKeyBytes);
 
                     byte[] encryptedPayload = Convert.FromBase64String(changeNotification.EncryptedContent.Data);
                     byte[] expectedSignature = Convert.FromBase64String(changeNotification.EncryptedContent.DataSignature);
