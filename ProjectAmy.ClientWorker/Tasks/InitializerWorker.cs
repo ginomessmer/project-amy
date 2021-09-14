@@ -1,18 +1,16 @@
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
-using System.Text;
-using System.IO;
 using ProjectAmy.ClientWorker.Options;
 
-namespace ProjectAmy.ClientWorker
+namespace ProjectAmy.ClientWorker.Tasks
 {
     public class InitializerWorker : BackgroundService
     {

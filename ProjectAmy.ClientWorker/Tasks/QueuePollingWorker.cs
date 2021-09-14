@@ -1,14 +1,13 @@
 using System;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Hosting;
 using ProjectAmy.ClientWorker.Events;
 
-namespace ProjectAmy.ClientWorker
+namespace ProjectAmy.ClientWorker.Tasks
 {
     public class QueuePollingWorker : BackgroundService
     {

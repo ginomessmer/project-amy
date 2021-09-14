@@ -11,12 +11,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using ProjectAmy.ClientWorker.Options;
+using ProjectAmy.ClientWorker.Tasks;
 
 namespace ProjectAmy.ClientWorker
 {
+
     public class Program
     {
-
         /*
          * Likely will not work, because subscribing to messages at channel level does not work with delegated permission and include resource data. It only works with application permission
          * public static IEnumerable<string> Scopes = new[] { "ChannelMessage.Read.All" };
