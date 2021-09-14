@@ -1,14 +1,13 @@
-using System;
 using ProjectAmy.ClientWorker.Rgb;
 using ProjectAmy.ClientWorker.Rgb.Animations;
 using Xunit;
 
-namespace ProjectAmy.Tests
+namespace ProjectAmy.Tests.Animations
 {
-    public class UnitTest1
+    public class AnimationIntegrationTests
     {
         [Fact]
-        public void Test1()
+        public void HeartAnimation_WithName_Successfully()
         {
             var animation = new HeartKeyboardRgbAnimation();
             animation.Play(new TeamsAnimationData("Martha"));
