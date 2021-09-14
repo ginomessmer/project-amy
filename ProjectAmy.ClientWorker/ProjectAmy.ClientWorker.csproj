@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Queues" Version="12.8.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Graph.Beta" Version="4.11.0-preview" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.36.0" />

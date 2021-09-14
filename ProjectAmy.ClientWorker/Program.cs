@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Azure.Storage.Queues;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using ProjectAmy.ClientWorker.Options;
@@ -50,9 +52,19 @@ namespace ProjectAmy.ClientWorker
                             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
                         })));
 
+                    // Storage
+                    services.AddSingleton<QueueClient>(_ =>
+                    {
+                        var client = new QueueClient(
+                            hostContext.Configuration.GetConnectionString("DefaultQueueConnection"), "reactions");
+
+                        client.CreateIfNotExists();
+                        return client;
+                    });
+
                     // Workers
                     services.AddHostedService<InitializerWorker>();
-                    services.AddHostedService<KeyboardReactionsWorker>();
+                    services.AddHostedService<QueuePollingWorker>();
                 });
     }
 }
