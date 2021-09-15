@@ -1,3 +1,4 @@
+import { Logger } from '@azure/functions';
 import { DefaultAzureCredential } from '@azure/identity';
 import { CryptographyClient, RsaDecryptParameters} from '@azure/keyvault-keys';
 import {ChangeNotificationCollection, ChangeNotification, ResourceData} from '@microsoft/microsoft-graph-types';
@@ -17,9 +18,9 @@ export class ChangeNotificationsService {
 
         // TODO handle change notifications
         for (const changeNotification of changeNotificationCollection.value) {
-            console.dir(changeNotification);
-
+           console.log("");
         }
+
 
 
         
@@ -31,15 +32,15 @@ export class ChangeNotificationsService {
                 const dataKey = changeNotification.encryptedContent.dataKey;
 
                 if (dataKey !== null && dataKey !== undefined) {
-                    const ciphertext = Buffer.from(dataKey);
+                    const ciphertext = Buffer.from(dataKey, 'base64');
                     const decryptParameters: RsaDecryptParameters = {
                         algorithm: 'RSA-OAEP',
                         ciphertext: ciphertext
                     };
                     const decryptedKey = await this.cryptographyClient.decrypt(decryptParameters);
-                    if (this.dataSignatureEquals(decryptedKey.result, changeNotification.encryptedContent.dataSignature)) {
+                    if (this.dataSignatureEquals(decryptedKey.result, changeNotification.encryptedContent.dataSignature, changeNotification.encryptedContent.data)) {
                         const decryptedResourceData = this.decryptResourceDataContent(decryptedKey.result, changeNotification.encryptedContent.data);
-                        changeNotification.resourceData = decryptedResourceData;
+                        changeNotification.resourceData = JSON.parse(decryptedResourceData);
                     } else {
                         throw new Error('Data signature does not match');
                     }
@@ -49,10 +50,9 @@ export class ChangeNotificationsService {
         }
     }
 
-    private dataSignatureEquals(key: BinaryLike | KeyObject, expectedSignature) {
-
-       /* const decryptedSymetricKey = []; //Buffer provided by previous step
-const base64encodedSignature = 'base64 encodded value from the dataSignature property';
+    private dataSignatureEquals(key: BinaryLike | KeyObject, expectedSignature: string, base64encodedPayload) {
+        /* const decryptedSymetricKey = []; //Buffer provided by previous step
+const  = 'base64 encodded value from the dataSignature property';
 const hmac = crypto.createHmac('sha256', decryptedSymetricKey);
 hmac.write(base64encodedPayload, 'base64');
 if(base64encodedSignature === hmac.digest('base64'))
@@ -64,9 +64,10 @@ else
     // Do not attempt to decrypt encryptedPayload. Assume notification payload has been tampered with and investigate.
 }
 */
+
         const hmac = createHmac('sha256', key);
-        hmac.write(expectedSignature);
-        return expectedSignature === hmac.digest('base64')
+        hmac.write(base64encodedPayload, 'base64');
+        return expectedSignature === hmac.digest('base64');
     }
 
     private decryptResourceDataContent(decryptedSymetricKey, base64encodedPayload: string){

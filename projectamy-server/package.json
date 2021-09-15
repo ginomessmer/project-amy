@@ -1,7 +1,7 @@
 {
   "name": "projectamy-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "",  
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",

@@ -3,8 +3,8 @@ import { ChangeNotificationsService } from "../services/ChangeNotificationsServi
 import { validateNewSubscription } from "../services/SubscriptionValidationService";
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
-
-
+   
+    context.log.info(JSON.stringify(req.body));
     const validationToken = req.query.validationToken;
     if (validationToken) {
         context.res = {
@@ -18,6 +18,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const changeNotificationsService = new ChangeNotificationsService();
         try {
             await changeNotificationsService.handleNotificationReceivedAsync(req.body);
+            context.log.info(JSON.stringify(req.body));
         } catch (error) {
             context.res = {
                 status: 500,
