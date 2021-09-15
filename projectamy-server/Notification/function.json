@@ -20,7 +20,7 @@
       "direction": "out",
       "name": "reactionsOutQueue",
       "queueName": "events",
-      "connection": "AZURE_STORAGE_QUEUE_CONNECTION_URL"
+      "connection": "_AZURE_STORAGE_QUEUE_CONNECTION_URL"
     }
   ],
   "scriptFile": "../dist/Notification/index.js"

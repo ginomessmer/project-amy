@@ -31,15 +31,24 @@ export class ChangeNotificationsService {
                     const message: ChatMessage = resourceData as ChatMessage;
                     const isMessageWithReaction = message.messageType === 'message' && message.reactions && message.reactions.length > 0;
                     if(isMessageWithReaction){
-                        const isReactionReasonForUpdate = message.lastModifiedDateTime && message.reactions.some(reaction => reaction.createdDateTime === message.lastModifiedDateTime);
-                        if(isReactionReasonForUpdate){
-                            message.reactions.filter(reaction => reaction.createdDateTime === message.lastModifiedDateTime).forEach(reaction => {
-                                const reactionHasUser = reaction.user.user && reaction.user.user.displayName;
+                        
+                        if(message.lastModifiedDateTime){
+                            const lastModifiedDate = new Date(message.lastModifiedDateTime);
+                            const newReactions = message.reactions.filter(reaction => {
+                                const reactionCreatedDate = new Date(reaction.createdDateTime);
+                                const millisecondsDelta = Math.abs(reactionCreatedDate.getTime() - lastModifiedDate.getTime());
+                                return  millisecondsDelta < 500;
+                            });
+                            if(newReactions && newReactions.length > 0){
+                                newReactions.forEach(reaction => {
+                                    const reactionHasUser = reaction.user.user && reaction.user.user.displayName;
                                 reactions.push({
                                     reactionType: reaction.reactionType,
                                     name: reactionHasUser ?reaction.user.user.displayName: null
                                 });
-                            });
+                                });
+                            }
+
                         }
                     }
 
