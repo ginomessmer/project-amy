@@ -1,11 +1,19 @@
 import { Logger } from '@azure/functions';
 import { DefaultAzureCredential } from '@azure/identity';
 import { CryptographyClient, RsaDecryptParameters} from '@azure/keyvault-keys';
-import {ChangeNotificationCollection, ChangeNotification, ResourceData} from '@microsoft/microsoft-graph-types';
+import {ChangeNotificationCollection, ChangeNotification,ChatMessage, ResourceData, ChatMessageReaction} from '@microsoft/microsoft-graph-types';
 import {createHmac, BinaryLike, KeyObject, createDecipheriv, CipherKey} from 'crypto';
+import { IReaction } from '../models/IReaction';
+
+
+function isChatMessage(object: any): object is ChatMessage {
+    return 'body' in object && 'messageType' in object ;
+}
+
 
 export class ChangeNotificationsService {
 
+    private static readonly MESSAGE_ENTITY_ODATA_CONTEXT = "/messages/$entity";
     private cryptographyClient: CryptographyClient;
 
     constructor(){
@@ -13,15 +21,33 @@ export class ChangeNotificationsService {
     
     }
 
-    public async handleNotificationReceivedAsync(changeNotificationCollection: ChangeNotificationCollection) {
+    public async handleNotificationReceivedAsync(changeNotificationCollection: ChangeNotificationCollection): Promise<IReaction[]> {
         await this.decryptEncryptedChangeNotifications(changeNotificationCollection);
-
-        // TODO handle change notifications
+        const reactions: IReaction[] = [];
         for (const changeNotification of changeNotificationCollection.value) {
-           console.log("");
+            if(changeNotification.resourceData){
+                const resourceData: ResourceData = changeNotification.resourceData;
+                if(isChatMessage(resourceData)){
+                    const message: ChatMessage = resourceData as ChatMessage;
+                    const isMessageWithReaction = message.messageType === 'message' && message.reactions && message.reactions.length > 0;
+                    if(isMessageWithReaction){
+                        const isReactionReasonForUpdate = message.lastModifiedDateTime && message.reactions.some(reaction => reaction.createdDateTime === message.lastModifiedDateTime);
+                        if(isReactionReasonForUpdate){
+                            message.reactions.filter(reaction => reaction.createdDateTime === message.lastModifiedDateTime).forEach(reaction => {
+                                const reactionHasUser = reaction.user.user && reaction.user.user.displayName;
+                                reactions.push({
+                                    reactionType: reaction.reactionType,
+                                    name: reactionHasUser ?reaction.user.user.displayName: null
+                                });
+                            });
+                        }
+                    }
+
+                }
+            }
         }
 
-
+        return reactions;
 
         
     }
