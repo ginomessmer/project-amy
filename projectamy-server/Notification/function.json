@@ -20,7 +20,7 @@
       "direction": "out",
       "name": "reactionsOutQueue",
       "queueName": "events",
-      "connection": "__projectamystorage"
+      "connection": "ProjectAmyStorageConnectionAppSetting"
     }
   ],
   "scriptFile": "../dist/Notification/index.js"

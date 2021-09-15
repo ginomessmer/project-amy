@@ -4,8 +4,6 @@ import { validateNewSubscription } from "../services/SubscriptionValidationServi
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
    
-    context.log.info(process.env.projectamystorage_STORAGE);
-    context.log.info(JSON.stringify(req.body));
     const validationToken = req.query.validationToken;
     if (validationToken) {
         context.res = {
@@ -20,7 +18,6 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         try {
             const reactions = await changeNotificationsService.handleNotificationReceivedAsync(req.body);
             context.bindings.reactionsOutQueue = reactions;
-            context.log.info(JSON.stringify(reactions));
         } catch (error) {
             context.res = {
                 status: 500,
