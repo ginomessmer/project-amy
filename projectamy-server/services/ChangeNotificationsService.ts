@@ -13,7 +13,6 @@ function isChatMessage(object: any): object is ChatMessage {
 
 export class ChangeNotificationsService {
 
-    private static readonly MESSAGE_ENTITY_ODATA_CONTEXT = "/messages/$entity";
     private cryptographyClient: CryptographyClient;
 
     constructor(){

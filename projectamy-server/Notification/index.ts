@@ -4,7 +4,7 @@ import { validateNewSubscription } from "../services/SubscriptionValidationServi
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
    
-    context.log.info(process.env);
+    context.log.info(process.env.AzureWebJobs__projectamystorage__serviceUri);
     context.log.info(JSON.stringify(req.body));
     const validationToken = req.query.validationToken;
     if (validationToken) {
