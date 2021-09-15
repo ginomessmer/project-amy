@@ -18,6 +18,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         try {
             const reactions = await changeNotificationsService.handleNotificationReceivedAsync(req.body);
             context.bindings.reactionsOutQueue = reactions;
+            context.log.info(JSON.stringify(context.req.body));
         } catch (error) {
             context.res = {
                 status: 500,
