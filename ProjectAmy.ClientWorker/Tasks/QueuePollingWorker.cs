@@ -38,9 +38,10 @@ namespace ProjectAmy.ClientWorker.Tasks
                 foreach (var message in messages)
                 {
                     var @event = JsonSerializer.Deserialize<ReactedEvent>(message.MessageText);
-                    var animation = @event.ReactionType switch
+                    IKeyboardRgbAnimation<TeamsAnimationData> animation = @event.ReactionType switch
                     {
                         ReactionTypes.Heart => new HeartKeyboardRgbAnimation(_controller),
+                        ReactionTypes.Like => new LikeKeyboardRgbAnimation(_controller),
                         _ => throw new ArgumentOutOfRangeException()
                     };
 

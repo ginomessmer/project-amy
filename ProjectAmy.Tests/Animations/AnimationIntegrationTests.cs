@@ -15,5 +15,13 @@ namespace ProjectAmy.Tests.Animations
             var animation = new HeartKeyboardRgbAnimation(new CorsairRgbController(logger.Object));
             animation.Play(new TeamsAnimationData("Martha"));
         }
+
+        [Fact]
+        public void LikeAnimation_WithName_Successfully()
+        {
+            var logger = new Mock<ILogger<CorsairRgbController>>();
+            var animation = new LikeKeyboardRgbAnimation(new CorsairRgbController(logger.Object));
+            animation.Play(new TeamsAnimationData("Martha"));
+        }
     }
 }
