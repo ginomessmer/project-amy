@@ -17,10 +17,12 @@ namespace ProjectAmy.ClientWorker.Tasks
     public class QueuePollingWorker : BackgroundService
     {
         private readonly QueueClient _queueClient;
+        private readonly IRgbController _controller;
 
-        public QueuePollingWorker(QueueClient queueClient)
+        public QueuePollingWorker(QueueClient queueClient, IRgbController controller)
         {
             _queueClient = queueClient;
+            _controller = controller;
         }
 
         /// <inheritdoc />
@@ -38,7 +40,7 @@ namespace ProjectAmy.ClientWorker.Tasks
                     var @event = JsonSerializer.Deserialize<ReactedEvent>(message.MessageText);
                     var animation = @event.ReactionType switch
                     {
-                        ReactionTypes.Heart => new HeartKeyboardRgbAnimation(),
+                        ReactionTypes.Heart => new HeartKeyboardRgbAnimation(_controller),
                         _ => throw new ArgumentOutOfRangeException()
                     };
 
