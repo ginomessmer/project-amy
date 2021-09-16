@@ -86,7 +86,7 @@ namespace ProjectAmy.ClientWorker.Tasks
                     NotificationUrl = _options.FunctionsNotificationsEndpoint,
                     //Resource = $"/teams/{_options.TeamId}/channels/{_options.ChannelId}/messages",
                     Resource = $"users/{loggedInUser.Id}/chats/getAllMessages",
-                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromMinutes(4) /*TimeSpan.FromHours(1)*/,
+                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
                     EncryptionCertificate = base64PublicKey,

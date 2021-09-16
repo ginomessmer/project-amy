@@ -1,7 +1,15 @@
+import { Logger } from '@azure/functions';
 import { DefaultAzureCredential } from '@azure/identity';
 import { CryptographyClient, RsaDecryptParameters} from '@azure/keyvault-keys';
-import {ChangeNotificationCollection, ChangeNotification, ResourceData} from '@microsoft/microsoft-graph-types';
+import {ChangeNotificationCollection, ChangeNotification,ChatMessage, ResourceData, ChatMessageReaction} from '@microsoft/microsoft-graph-types';
 import {createHmac, BinaryLike, KeyObject, createDecipheriv, CipherKey} from 'crypto';
+import { IReaction } from '../models/IReaction';
+
+
+function isChatMessage(object: any): object is ChatMessage {
+    return 'body' in object && 'messageType' in object ;
+}
+
 
 export class ChangeNotificationsService {
 
@@ -12,15 +20,42 @@ export class ChangeNotificationsService {
     
     }
 
-    public async handleNotificationReceivedAsync(changeNotificationCollection: ChangeNotificationCollection) {
+    public async handleNotificationReceivedAsync(changeNotificationCollection: ChangeNotificationCollection): Promise<IReaction[]> {
         await this.decryptEncryptedChangeNotifications(changeNotificationCollection);
-
-        // TODO handle change notifications
+        const reactions: IReaction[] = [];
         for (const changeNotification of changeNotificationCollection.value) {
-            console.dir(changeNotification);
+            if(changeNotification.resourceData){
+                const resourceData: ResourceData = changeNotification.resourceData;
+                if(isChatMessage(resourceData)){
+                    const message: ChatMessage = resourceData as ChatMessage;
+                    const isMessageWithReaction = message.messageType === 'message' && message.reactions && message.reactions.length > 0;
+                    if(isMessageWithReaction){
+                        
+                        if(message.lastModifiedDateTime){
+                            const lastModifiedDate = new Date(message.lastModifiedDateTime);
+                            const newReactions = message.reactions.filter(reaction => {
+                                const reactionCreatedDate = new Date(reaction.createdDateTime);
+                                const millisecondsDelta = Math.abs(reactionCreatedDate.getTime() - lastModifiedDate.getTime());
+                                return  millisecondsDelta < 500;
+                            });
+                            if(newReactions && newReactions.length > 0){
+                                newReactions.forEach(reaction => {
+                                    const reactionHasUser = reaction.user.user && reaction.user.user.displayName;
+                                reactions.push({
+                                    reactionType: reaction.reactionType,
+                                    name: reactionHasUser ?reaction.user.user.displayName: null
+                                });
+                                });
+                            }
 
+                        }
+                    }
+
+                }
+            }
         }
 
+        return reactions;
 
         
     }
@@ -31,15 +66,15 @@ export class ChangeNotificationsService {
                 const dataKey = changeNotification.encryptedContent.dataKey;
 
                 if (dataKey !== null && dataKey !== undefined) {
-                    const ciphertext = Buffer.from(dataKey);
+                    const ciphertext = Buffer.from(dataKey, 'base64');
                     const decryptParameters: RsaDecryptParameters = {
                         algorithm: 'RSA-OAEP',
                         ciphertext: ciphertext
                     };
                     const decryptedKey = await this.cryptographyClient.decrypt(decryptParameters);
-                    if (this.dataSignatureEquals(decryptedKey.result, changeNotification.encryptedContent.dataSignature)) {
+                    if (this.dataSignatureEquals(decryptedKey.result, changeNotification.encryptedContent.dataSignature, changeNotification.encryptedContent.data)) {
                         const decryptedResourceData = this.decryptResourceDataContent(decryptedKey.result, changeNotification.encryptedContent.data);
-                        changeNotification.resourceData = decryptedResourceData;
+                        changeNotification.resourceData = JSON.parse(decryptedResourceData);
                     } else {
                         throw new Error('Data signature does not match');
                     }
@@ -49,10 +84,9 @@ export class ChangeNotificationsService {
         }
     }
 
-    private dataSignatureEquals(key: BinaryLike | KeyObject, expectedSignature) {
-
-       /* const decryptedSymetricKey = []; //Buffer provided by previous step
-const base64encodedSignature = 'base64 encodded value from the dataSignature property';
+    private dataSignatureEquals(key: BinaryLike | KeyObject, expectedSignature: string, base64encodedPayload) {
+        /* const decryptedSymetricKey = []; //Buffer provided by previous step
+const  = 'base64 encodded value from the dataSignature property';
 const hmac = crypto.createHmac('sha256', decryptedSymetricKey);
 hmac.write(base64encodedPayload, 'base64');
 if(base64encodedSignature === hmac.digest('base64'))
@@ -64,9 +98,10 @@ else
     // Do not attempt to decrypt encryptedPayload. Assume notification payload has been tampered with and investigate.
 }
 */
+
         const hmac = createHmac('sha256', key);
-        hmac.write(expectedSignature);
-        return expectedSignature === hmac.digest('base64')
+        hmac.write(base64encodedPayload, 'base64');
+        return expectedSignature === hmac.digest('base64');
     }
 
     private decryptResourceDataContent(decryptedSymetricKey, base64encodedPayload: string){
