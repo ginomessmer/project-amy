@@ -10,6 +10,6 @@ namespace ProjectAmy.ClientWorker.Events
         /// <summary>
         /// The name of the user who triggered the reaction.
         /// </summary>
-        public string Name { get; set; }
+        public string UserId { get; set; }
     }
 }

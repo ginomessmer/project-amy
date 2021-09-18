@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using ProjectAmy.ClientWorker.Options;
+using ProjectAmy.ClientWorker.Rgb;
 using ProjectAmy.ClientWorker.Tasks;
 
 namespace ProjectAmy.ClientWorker
@@ -62,6 +63,9 @@ namespace ProjectAmy.ClientWorker
                         client.CreateIfNotExists();
                         return client;
                     });
+
+                    // iCUE
+                    services.AddSingleton<IRgbController, CorsairRgbController>();
 
                     // Workers
                     services.AddHostedService<InitializerWorker>();

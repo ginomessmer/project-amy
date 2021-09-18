@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectAmy.ClientWorker", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectAmy.Server", "ProjectAmy.Server\ProjectAmy.Server.csproj", "{DB3AFE7C-D1DB-42A2-8124-39D9CC80DC04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectAmy.Tests", "ProjectAmy.Tests\ProjectAmy.Tests.csproj", "{97585D8A-57E1-46EB-8B33-A96FB13C312A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectAmy.Tests", "ProjectAmy.Tests\ProjectAmy.Tests.csproj", "{97585D8A-57E1-46EB-8B33-A96FB13C312A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
