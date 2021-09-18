@@ -40,10 +40,10 @@ export class ChangeNotificationsService {
                             });
                             if(newReactions && newReactions.length > 0){
                                 newReactions.forEach(reaction => {
-                                    const reactionHasUser = reaction.user.user && reaction.user.user.displayName;
+                                    const reactionHasUser = reaction.user.user && reaction.user.user.id;
                                 reactions.push({
                                     reactionType: reaction.reactionType,
-                                    name: reactionHasUser ?reaction.user.user.displayName: null
+                                    userID: reactionHasUser ? reaction.user.user.id : null
                                 });
                                 });
                             }
