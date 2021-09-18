@@ -23,5 +23,13 @@ namespace ProjectAmy.ClientWorker.Rgb.Animations
 
             Thread.Sleep(3500);
         }
+        
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            _controller.Clear();
+            _controller.Update();
+        }
     }
 }

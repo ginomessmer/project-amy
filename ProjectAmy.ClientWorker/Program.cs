@@ -24,7 +24,6 @@ namespace ProjectAmy.ClientWorker
          * public static IEnumerable<string> Scopes = new[] { "ChannelMessage.Read.All" };
         */
         public static IEnumerable<string> Scopes = new[] { "Chat.Read", "User.Read" };
-        public const string PublicKeyPath = "C:\\Users\\Malte\\cert.pem";
 
         public static void Main(string[] args)
         {
@@ -57,8 +56,12 @@ namespace ProjectAmy.ClientWorker
                     // Storage
                     services.AddSingleton<QueueClient>(_ =>
                     {
-                        var client = new QueueClient(
-                            hostContext.Configuration.GetConnectionString("DefaultQueueConnection"), "reactions");
+                        var client = new QueueClient(hostContext.Configuration.GetConnectionString("DefaultQueueConnection"),
+                            "events", 
+                            new QueueClientOptions
+                            {
+                                MessageEncoding = QueueMessageEncoding.Base64
+                            });
 
                         client.CreateIfNotExists();
                         return client;

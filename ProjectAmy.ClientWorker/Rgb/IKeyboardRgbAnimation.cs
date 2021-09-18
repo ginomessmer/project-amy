@@ -1,6 +1,8 @@
+using System;
+
 namespace ProjectAmy.ClientWorker.Rgb
 {
-    public interface IKeyboardRgbAnimation<in T> where T : IAnimationData
+    public interface IKeyboardRgbAnimation<in T> : IDisposable where T : IAnimationData
     {
         /// <summary>
         /// Plays a RGB animation on the RGB device.

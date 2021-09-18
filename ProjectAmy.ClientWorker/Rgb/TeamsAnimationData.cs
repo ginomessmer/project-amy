@@ -14,10 +14,5 @@ namespace ProjectAmy.ClientWorker.Rgb
         {
             Name = name;
         }
-
-        public TeamsAnimationData(ReactedEvent @event)
-        {
-            Name = @event.UserId;
-        }
     }
 }

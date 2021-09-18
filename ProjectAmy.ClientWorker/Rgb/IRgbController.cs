@@ -25,5 +25,10 @@ namespace ProjectAmy.ClientWorker.Rgb
         /// Applies all the controller operations to the device.
         /// </summary>
         void Update();
+
+        /// <summary>
+        /// Clears the RGB lightning across all devices.
+        /// </summary>
+        void Clear();
     }
 }
