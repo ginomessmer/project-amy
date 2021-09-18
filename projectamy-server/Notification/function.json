@@ -20,7 +20,7 @@
       "direction": "out",
       "name": "reactionsOutQueue",
       "queueName": "events",
-      "connection": "ProjectAmyStorageConnectionAppSetting"
+      "connection": "AzureWebJobsStorage"
     }
   ],
   "scriptFile": "../dist/Notification/index.js"
