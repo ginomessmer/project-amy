@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace ProjectAmy.ClientWorker.Tasks
+namespace ProjectAmy.ClientWorker.Services
 {
     public interface IUserService
     {

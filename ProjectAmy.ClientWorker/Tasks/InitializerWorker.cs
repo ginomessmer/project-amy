@@ -51,7 +51,6 @@ namespace ProjectAmy.ClientWorker.Tasks
             try
             {
                 var subscriptions = await _graphServiceClient.Subscriptions.Request()
-                    // TODO: Figure out how to filter
                     .GetAsync(stoppingToken);
 
                 _logger.LogInformation("Found {subscriptions}", subscriptions.Count);
@@ -66,32 +65,20 @@ namespace ProjectAmy.ClientWorker.Tasks
         {
             try
             {
-                string base64PublicKey;
-                using (FileStream fs = new FileStream(Program.PublicKeyPath, FileMode.Open))
-                {
-                    using (BinaryReader binaryReader = new BinaryReader(fs))
-                    {
-                        Byte[] bytes = binaryReader.ReadBytes((Int32)fs.Length);
-                        base64PublicKey = Convert.ToBase64String(bytes, 0, bytes.Length);
-                    }
-                }
-                _logger.LogInformation(base64PublicKey);
-
-                var loggedInUser = await _graphServiceClient.Me.Request().GetAsync();
+                var base64PublicKey = ReadCertificate();
+                var loggedInUser = await _graphServiceClient.Me.Request().GetAsync(stoppingToken);
                 
                 // Register subscription if required
                 var subscription = new Subscription
                 {
                     ChangeType = "updated",
                     NotificationUrl = _options.FunctionsNotificationsEndpoint,
-                    //Resource = $"/teams/{_options.TeamId}/channels/{_options.ChannelId}/messages",
                     Resource = $"users/{loggedInUser.Id}/chats/getAllMessages",
                     ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
                     LatestSupportedTlsVersion = "v1_2",
                     IncludeResourceData = true,
                     EncryptionCertificate = base64PublicKey,
                     EncryptionCertificateId = "graph-change-notification-cert",
-                    
                 };
 
                 await _graphServiceClient.Subscriptions
@@ -104,6 +91,17 @@ namespace ProjectAmy.ClientWorker.Tasks
             {
                 _logger.LogError(e, "Failed to create a subscription");
             }
+        }
+
+        private string ReadCertificate()
+        {
+            using var fs = new FileStream(_options.PublicKeyCertificatePath, FileMode.Open);
+            using var binaryReader = new BinaryReader(fs);
+            var bytes = binaryReader.ReadBytes((int)fs.Length);
+
+            var base64PublicKey = Convert.ToBase64String(bytes, 0, bytes.Length);
+
+            return base64PublicKey;
         }
     }
 }

@@ -24,7 +24,6 @@ namespace ProjectAmy.ClientWorker
          * public static IEnumerable<string> Scopes = new[] { "ChannelMessage.Read.All" };
         */
         public static IEnumerable<string> Scopes = new[] { "Chat.Read", "User.Read" };
-        public const string PublicKeyPath = "C:\\Users\\Malte\\cert.pem";
 
         public static void Main(string[] args)
         {

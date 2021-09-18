@@ -39,7 +39,7 @@ namespace ProjectAmy.ClientWorker.Tasks
                 {
                     var @event = JsonSerializer.Deserialize<ReactedEvent>(message.MessageText);
 
-                    //var name = await GetNameAsync(@event.UserId);
+                    // var name = await GetNameAsync(@event.UserId);
 
                     IKeyboardRgbAnimation<TeamsAnimationData> animation = @event.ReactionType switch
                     {

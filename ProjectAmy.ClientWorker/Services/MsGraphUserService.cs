@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.Graph;
 
-namespace ProjectAmy.ClientWorker.Tasks
+namespace ProjectAmy.ClientWorker.Services
 {
     public class MsGraphUserService : IUserService
     {
