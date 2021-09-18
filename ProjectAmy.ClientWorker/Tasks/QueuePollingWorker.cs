@@ -38,6 +38,9 @@ namespace ProjectAmy.ClientWorker.Tasks
                 foreach (var message in messages)
                 {
                     var @event = JsonSerializer.Deserialize<ReactedEvent>(message.MessageText);
+
+                    //var name = await GetNameAsync(@event.UserId);
+
                     IKeyboardRgbAnimation<TeamsAnimationData> animation = @event.ReactionType switch
                     {
                         ReactionTypes.Heart => new HeartKeyboardRgbAnimation(_controller),
@@ -45,7 +48,10 @@ namespace ProjectAmy.ClientWorker.Tasks
                         _ => throw new ArgumentOutOfRangeException()
                     };
 
-                    animation.Play(new TeamsAnimationData(@event));
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+
+                    animation.Play(new TeamsAnimationData("Test"));
+                    animation.Dispose();
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);

@@ -57,8 +57,12 @@ namespace ProjectAmy.ClientWorker
                     // Storage
                     services.AddSingleton<QueueClient>(_ =>
                     {
-                        var client = new QueueClient(
-                            hostContext.Configuration.GetConnectionString("DefaultQueueConnection"), "reactions");
+                        var client = new QueueClient(hostContext.Configuration.GetConnectionString("DefaultQueueConnection"),
+                            "events", 
+                            new QueueClientOptions
+                            {
+                                MessageEncoding = QueueMessageEncoding.Base64
+                            });
 
                         client.CreateIfNotExists();
                         return client;

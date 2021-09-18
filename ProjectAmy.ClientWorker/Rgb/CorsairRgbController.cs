@@ -66,6 +66,12 @@ namespace ProjectAmy.ClientWorker.Rgb
         /// <inheritdoc />
         public void Update() => CorsairLightingSDK.SetLedsColorsFlushBuffer();
 
+        /// <inheritdoc />
+        public void Clear()
+        {
+            SetBackground(new CorsairLedColor());
+        }
+
         private void ControlDevice()
         {
             CorsairLightingSDK.PerformProtocolHandshake();
