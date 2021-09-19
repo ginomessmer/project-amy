@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using ProjectAmy.ClientWorker.Events;
 using ProjectAmy.ClientWorker.Rgb;
 using ProjectAmy.ClientWorker.Rgb.Animations;
+using ProjectAmy.ClientWorker.Services;
 
 namespace ProjectAmy.ClientWorker.Tasks
 {
@@ -18,11 +19,14 @@ namespace ProjectAmy.ClientWorker.Tasks
     {
         private readonly QueueClient _queueClient;
         private readonly IRgbController _controller;
+        private readonly IUserService _userService;
 
-        public QueuePollingWorker(QueueClient queueClient, IRgbController controller)
+        public QueuePollingWorker(QueueClient queueClient, IRgbController controller,
+            IUserService userService)
         {
             _queueClient = queueClient;
             _controller = controller;
+            _userService = userService;
         }
 
         /// <inheritdoc />
@@ -38,8 +42,8 @@ namespace ProjectAmy.ClientWorker.Tasks
                 foreach (var message in messages)
                 {
                     var @event = JsonSerializer.Deserialize<ReactedEvent>(message.MessageText);
-
-                    // var name = await GetNameAsync(@event.UserId);
+                    
+                    var name = await _userService.GetNameAsync(@event.UserId);
 
                     IKeyboardRgbAnimation<TeamsAnimationData> animation = @event.ReactionType switch
                     {
@@ -50,7 +54,7 @@ namespace ProjectAmy.ClientWorker.Tasks
 
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
 
-                    animation.Play(new TeamsAnimationData("Test"));
+                    animation.Play(new TeamsAnimationData(name));
                     animation.Dispose();
                 }
 

@@ -12,6 +12,7 @@ using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using ProjectAmy.ClientWorker.Options;
 using ProjectAmy.ClientWorker.Rgb;
+using ProjectAmy.ClientWorker.Services;
 using ProjectAmy.ClientWorker.Tasks;
 
 namespace ProjectAmy.ClientWorker
@@ -52,6 +53,8 @@ namespace ProjectAmy.ClientWorker
                             var result = await app.AcquireTokenSilent(Scopes, account).ExecuteAsync();
                             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
                         })));
+
+                    services.AddSingleton<IUserService, MsGraphUserService>();
 
                     // Storage
                     services.AddSingleton<QueueClient>(_ =>
