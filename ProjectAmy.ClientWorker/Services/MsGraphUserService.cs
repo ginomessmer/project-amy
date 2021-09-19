@@ -17,7 +17,7 @@ namespace ProjectAmy.ClientWorker.Services
         public async Task<string> GetNameAsync(string id)
         {
             var user = await _graphServiceClient.Users[id].Request().GetAsync();
-            return "";
+            return user.DisplayName;
         }
     }
 }
