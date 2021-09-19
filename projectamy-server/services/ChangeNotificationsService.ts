@@ -1,4 +1,3 @@
-import { Logger } from '@azure/functions';
 import { DefaultAzureCredential } from '@azure/identity';
 import { CryptographyClient, RsaDecryptParameters} from '@azure/keyvault-keys';
 import {ChangeNotificationCollection, ChangeNotification,ChatMessage, ResourceData, ChatMessageReaction} from '@microsoft/microsoft-graph-types';
@@ -16,48 +15,47 @@ export class ChangeNotificationsService {
     private cryptographyClient: CryptographyClient;
 
     constructor(){
-        this.cryptographyClient = new CryptographyClient(process.env.AZURE_KEY_VAULT_DECRYPTION_KEY_URL ,new DefaultAzureCredential() );
-    
+        this.cryptographyClient = new CryptographyClient(process.env.AZURE_KEY_VAULT_DECRYPTION_KEY_URL , new DefaultAzureCredential() )
     }
 
     public async handleNotificationReceivedAsync(changeNotificationCollection: ChangeNotificationCollection): Promise<IReaction[]> {
         await this.decryptEncryptedChangeNotifications(changeNotificationCollection);
-        const reactions: IReaction[] = [];
-        for (const changeNotification of changeNotificationCollection.value) {
-            if(changeNotification.resourceData){
-                const resourceData: ResourceData = changeNotification.resourceData;
-                if(isChatMessage(resourceData)){
-                    const message: ChatMessage = resourceData as ChatMessage;
-                    const isMessageWithReaction = message.messageType === 'message' && message.reactions && message.reactions.length > 0;
-                    if(isMessageWithReaction){
-                        
-                        if(message.lastModifiedDateTime){
-                            const lastModifiedDate = new Date(message.lastModifiedDateTime);
-                            const newReactions = message.reactions.filter(reaction => {
-                                const reactionCreatedDate = new Date(reaction.createdDateTime);
-                                const millisecondsDelta = Math.abs(reactionCreatedDate.getTime() - lastModifiedDate.getTime());
-                                return  millisecondsDelta < 500;
-                            });
-                            if(newReactions && newReactions.length > 0){
-                                newReactions.forEach(reaction => {
-                                    const reactionHasUser = reaction.user.user && reaction.user.user.id;
-                                reactions.push({
+        const reactionsOfEachNotification = changeNotificationCollection.value.map(this.extractReactionsFromChangeNotification);
+        const reactions = reactionsOfEachNotification.flat();
+        return reactions;
+    }
+
+    private extractReactionsFromChangeNotification(changeNotification: ChangeNotification): IReaction[] {
+        if(changeNotification.resourceData){
+            const resourceData: ResourceData = changeNotification.resourceData;
+            if(isChatMessage(resourceData)){
+                const message: ChatMessage = resourceData as ChatMessage;
+                const isMessageWithReaction = message.messageType === 'message' && message.reactions && message.reactions.length > 0;
+                if(isMessageWithReaction){
+                    
+                    if(message.lastModifiedDateTime){
+                        const lastModifiedDate = new Date(message.lastModifiedDateTime);
+                        const newReactions = message.reactions.filter(reaction => {
+                            const reactionCreatedDate = new Date(reaction.createdDateTime);
+                            const millisecondsDelta = Math.abs(reactionCreatedDate.getTime() - lastModifiedDate.getTime());
+                            return  millisecondsDelta < 500;
+                        });
+                        if(newReactions && newReactions.length > 0){
+                            return newReactions.map(reaction => {
+                                const reactionHasUser = reaction.user.user && reaction.user.user.id;
+                                return {
                                     reactionType: reaction.reactionType,
                                     userID: reactionHasUser ? reaction.user.user.id : null
-                                });
-                                });
-                            }
-
+                                }
+                            });
                         }
-                    }
 
+                    }
                 }
+
             }
         }
 
-        return reactions;
-
-        
     }
 
     private async decryptEncryptedChangeNotifications(changeNotificationCollection: ChangeNotificationCollection) {
