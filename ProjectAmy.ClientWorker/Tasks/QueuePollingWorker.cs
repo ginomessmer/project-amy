@@ -47,8 +47,8 @@ namespace ProjectAmy.ClientWorker.Tasks
 
                     IKeyboardRgbAnimation<TeamsAnimationData> animation = @event.ReactionType switch
                     {
-                        ReactionTypes.Heart => new HeartKeyboardRgbAnimation(_controller),
-                        ReactionTypes.Like => new LikeKeyboardRgbAnimation(_controller),
+                        ReactionTypes.Heart => new HeartKeyboardRgbAnimation(_controller, @event.ReactionType ),
+                        ReactionTypes.Like => new LikeKeyboardRgbAnimation(_controller, @event.ReactionType),
                         _ => throw new ArgumentOutOfRangeException()
                     };
 

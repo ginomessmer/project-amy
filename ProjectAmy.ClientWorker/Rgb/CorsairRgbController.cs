@@ -12,6 +12,7 @@ namespace ProjectAmy.ClientWorker.Rgb
     public class CorsairRgbController : IRgbController
     {
         private readonly ILogger<CorsairRgbController> _logger;
+        private bool _connected = true;
 
         public CorsairRgbController(ILogger<CorsairRgbController> logger)
         {
@@ -79,12 +80,9 @@ namespace ProjectAmy.ClientWorker.Rgb
             if (CorsairLightingSDK.GetLastError() != CorsairError.Success)
             {
                 var exception = new Exception("Failed to connect to iCUE");
-                _logger.LogCritical(exception, "Couldn't connect to iCUE. Exiting shortly...");
-
-                Thread.Sleep(2000);
-                Environment.Exit(1);
-
-                throw exception;
+                _logger.LogCritical(exception, "Couldn't connect to iCUE for Corsair keyboard.");
+                _connected = false;
+                return;
             }
 
             CorsairLightingSDK.RequestControl(CorsairAccessMode.ExclusiveLightingControl);
@@ -111,5 +109,10 @@ namespace ProjectAmy.ClientWorker.Rgb
         /// </summary>
         private static (int index, CorsairDeviceInfo device) GetKeyboard() =>
             GetDevices().SingleOrDefault(x => x.device.Type == CorsairDeviceType.Keyboard);
+
+        public bool IsConnected()
+        {
+            return _connected;
+        }
     }
 }

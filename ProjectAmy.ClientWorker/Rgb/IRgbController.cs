@@ -30,5 +30,11 @@ namespace ProjectAmy.ClientWorker.Rgb
         /// Clears the RGB lightning across all devices.
         /// </summary>
         void Clear();
+
+        /// <summary>
+        /// Whether or not this RGB controller is connected to a keyboard.
+        /// </summary>
+        /// <returns>True if this controller is connected to a device. Returns False is this controller is not connected to a device.</returns>
+        bool IsConnected();
     }
 }

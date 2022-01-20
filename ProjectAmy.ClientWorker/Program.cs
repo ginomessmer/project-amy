@@ -71,6 +71,8 @@ namespace ProjectAmy.ClientWorker
                     });
 
                     // iCUE
+                    // Replace this singleton with your own implementation of IRgbController
+                    // if you want to use the keyboard of a different company.
                     services.AddSingleton<IRgbController, CorsairRgbController>();
 
                     // Workers
