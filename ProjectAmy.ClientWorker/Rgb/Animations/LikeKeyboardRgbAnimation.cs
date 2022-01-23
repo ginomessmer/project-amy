@@ -6,8 +6,8 @@ namespace ProjectAmy.ClientWorker.Rgb.Animations
 {
     public sealed class LikeKeyboardRgbAnimation : GenericRgbAnimation
     {
-        public LikeKeyboardRgbAnimation(IRgbController controller, string type)
-            : base(controller, new CorsairLedColor { R = 255, G = 211}, type)
+        public LikeKeyboardRgbAnimation(IRgbController controller, string type, ILogger logger)
+            : base(controller, new CorsairLedColor { R = 255, G = 211}, type, logger)
         {
         }
     }

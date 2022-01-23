@@ -13,7 +13,7 @@ namespace ProjectAmy.ClientWorker.Services
         }
 
         /// <param name="id"></param>
-        /// <inheritdoc />
+        /// <inheritdoc /> 
         public async Task<string> GetNameAsync(string id)
         {
             var user = await _graphServiceClient.Users[id].Request().GetAsync();

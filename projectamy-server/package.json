@@ -1,7 +1,7 @@
 {
   "name": "projectamy-server",
   "version": "1.0.0",
-  "description": "",  
+  "description": "",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -10,7 +10,7 @@
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
-    "@azure/identity": "^1.5.2",
+    "@azure/identity": "^2.0.1",
     "@azure/keyvault-keys": "^4.3.0"
   },
   "devDependencies": {

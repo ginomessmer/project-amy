@@ -14,6 +14,7 @@ namespace ProjectAmy.ClientWorker.Options
         /// </summary>
         public string FunctionsNotificationsEndpoint { get; set; }
 
+
         /// <summary>
         /// TODO: @Malte
         /// </summary>

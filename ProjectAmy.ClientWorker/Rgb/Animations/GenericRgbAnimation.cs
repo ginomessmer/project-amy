@@ -6,7 +6,7 @@ namespace ProjectAmy.ClientWorker.Rgb.Animations
 {
     public abstract class GenericRgbAnimation : IKeyboardRgbAnimation<TeamsAnimationData>
     {
-        private readonly ILogger<GenericRgbAnimation> _logger;
+        private readonly ILogger _logger;
 
         private readonly string _animationName;
 
@@ -15,8 +15,9 @@ namespace ProjectAmy.ClientWorker.Rgb.Animations
 
 
 
-        protected GenericRgbAnimation(IRgbController controller, CorsairLedColor backdrop,  string animationName)
+        protected GenericRgbAnimation(IRgbController controller, CorsairLedColor backdrop,  string animationName, ILogger logger)
         {
+            _logger = logger;
             _animationName = animationName;
             _controller = controller;
             Backdrop = backdrop;
@@ -34,7 +35,7 @@ namespace ProjectAmy.ClientWorker.Rgb.Animations
                 Thread.Sleep(3500);
             } else
             {
-                _logger.LogInformation($"Received {_animationName}");
+                _logger.LogInformation($"Received {_animationName} from {animationData.Name}");
             }
             
         }

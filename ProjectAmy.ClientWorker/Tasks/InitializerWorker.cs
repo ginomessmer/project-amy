@@ -40,13 +40,19 @@ namespace ProjectAmy.ClientWorker.Tasks
                     .ExecuteAsync(stoppingToken);
                  _logger.LogInformation("Sign-in successful!");
             }
-            
+
             // Check and create subscriptions
-            await CheckSubscriptionsAsync(stoppingToken);
-            await CreateSubscriptionAsync(stoppingToken);
+            var loggedInUser = await _graphServiceClient.Me.Request().GetAsync(stoppingToken);
+            var numExistingSubscriptions = await CheckSubscriptionsAsync(stoppingToken, loggedInUser);
+            if(numExistingSubscriptions == 0)
+            {
+                var base64PublicKey = ReadCertificate();
+                await CreateSubscriptionAsync(stoppingToken, loggedInUser, base64PublicKey, true);
+
+            }
         }
 
-        private async Task CheckSubscriptionsAsync(CancellationToken stoppingToken)
+        private async Task<int> CheckSubscriptionsAsync(CancellationToken stoppingToken, User loggedInUser)
         {
             try
             {
@@ -54,32 +60,36 @@ namespace ProjectAmy.ClientWorker.Tasks
                     .GetAsync(stoppingToken);
 
                 _logger.LogInformation("Found {subscriptions}", subscriptions.Count);
+                return subscriptions.Count;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to retrieve subscriptions");
+
             }
+            return 0;
         }
 
-        private async Task CreateSubscriptionAsync(CancellationToken stoppingToken)
+        private async Task CreateSubscriptionAsync(CancellationToken stoppingToken, User loggedInUser, string base64PublicKey, bool retryAllowed)
         {
+           
+
+
+            // Register subscription if required
+            var subscription = new Subscription
+            {
+                ChangeType = "updated",
+                NotificationUrl = _options.FunctionsNotificationsEndpoint,
+                Resource = $"users/{loggedInUser.Id}/chats/getAllMessages",
+                ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
+                LatestSupportedTlsVersion = "v1_2",
+                IncludeResourceData = true,
+                EncryptionCertificate = base64PublicKey,
+                EncryptionCertificateId = "graph-decryption-cert",
+            };
             try
             {
-                var base64PublicKey = ReadCertificate();
-                var loggedInUser = await _graphServiceClient.Me.Request().GetAsync(stoppingToken);
                 
-                // Register subscription if required
-                var subscription = new Subscription
-                {
-                    ChangeType = "updated",
-                    NotificationUrl = _options.FunctionsNotificationsEndpoint,
-                    Resource = $"users/{loggedInUser.Id}/chats/getAllMessages",
-                    ExpirationDateTime = DateTime.UtcNow + TimeSpan.FromHours(1),
-                    LatestSupportedTlsVersion = "v1_2",
-                    IncludeResourceData = true,
-                    EncryptionCertificate = base64PublicKey,
-                    EncryptionCertificateId = "graph-change-notification-cert",
-                };
 
                 await _graphServiceClient.Subscriptions
                     .Request()
@@ -89,6 +99,11 @@ namespace ProjectAmy.ClientWorker.Tasks
             }
             catch (Exception e)
             {
+                if(retryAllowed && e.Message == "Subscription validation request timed out.")
+                {
+                    await CreateSubscriptionAsync(stoppingToken, loggedInUser, base64PublicKey, false);
+                    return;
+                } 
                 _logger.LogError(e, "Failed to create a subscription");
             }
         }
@@ -97,7 +112,7 @@ namespace ProjectAmy.ClientWorker.Tasks
         {
             using var fs = new FileStream(_options.PublicKeyCertificatePath, FileMode.Open);
             using var binaryReader = new BinaryReader(fs);
-            var bytes = binaryReader.ReadBytes((int)fs.Length);
+            var bytes = binaryReader.ReadBytes((Int32)fs.Length);
 
             var base64PublicKey = Convert.ToBase64String(bytes, 0, bytes.Length);
 

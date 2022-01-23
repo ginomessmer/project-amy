@@ -15,7 +15,8 @@ export class ChangeNotificationsService {
     private cryptographyClient: CryptographyClient;
 
     constructor(){
-        this.cryptographyClient = new CryptographyClient(process.env.AZURE_KEY_VAULT_DECRYPTION_KEY_URL , new DefaultAzureCredential() )
+            
+        this.cryptographyClient = new CryptographyClient(process.env.AZURE_KEY_VAULT_DECRYPTION_KEY_URL , new DefaultAzureCredential() );
     }
 
     public async handleNotificationReceivedAsync(changeNotificationCollection: ChangeNotificationCollection): Promise<IReaction[]> {

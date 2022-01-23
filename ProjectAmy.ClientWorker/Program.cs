@@ -40,7 +40,7 @@ namespace ProjectAmy.ClientWorker
 
                     // MSAL
                     services.AddSingleton(_ => PublicClientApplicationBuilder
-                        .Create("00f05160-5e0b-4645-ab5f-f35797d95168")
+                        .Create(hostContext.Configuration.GetConnectionString("ApplicationId")/* "00f05160-5e0b-4645-ab5f-f35797d95168"*/)
                         .WithDefaultRedirectUri()
                         .Build());
 
@@ -66,7 +66,7 @@ namespace ProjectAmy.ClientWorker
                                 MessageEncoding = QueueMessageEncoding.Base64
                             });
 
-                        client.CreateIfNotExists();
+                        var result = client.CreateIfNotExists();
                         return client;
                     });
 

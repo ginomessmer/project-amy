@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ProjectAmy.ClientWorker.Events;
 using ProjectAmy.ClientWorker.Rgb;
 using ProjectAmy.ClientWorker.Rgb.Animations;
@@ -17,13 +18,15 @@ namespace ProjectAmy.ClientWorker.Tasks
     /// </summary>
     public class QueuePollingWorker : BackgroundService
     {
+        private readonly ILogger<QueuePollingWorker> _logger;
         private readonly QueueClient _queueClient;
         private readonly IRgbController _controller;
         private readonly IUserService _userService;
 
-        public QueuePollingWorker(QueueClient queueClient, IRgbController controller,
+        public QueuePollingWorker(ILogger<QueuePollingWorker> logger, QueueClient queueClient, IRgbController controller,
             IUserService userService)
         {
+            _logger = logger;
             _queueClient = queueClient;
             _controller = controller;
             _userService = userService;
@@ -42,13 +45,22 @@ namespace ProjectAmy.ClientWorker.Tasks
                 foreach (var message in messages)
                 {
                     var @event = JsonSerializer.Deserialize<ReactedEvent>(message.MessageText);
-                    
-                    var name = await _userService.GetNameAsync(@event.UserId);
+                    var name = "";
+                    try
+                    {
+                        name = await _userService.GetNameAsync(@event.UserId);
+
+                    }
+                    catch (Exception e)
+                    {
+
+                        throw e;
+                    }
 
                     IKeyboardRgbAnimation<TeamsAnimationData> animation = @event.ReactionType switch
                     {
-                        ReactionTypes.Heart => new HeartKeyboardRgbAnimation(_controller, @event.ReactionType ),
-                        ReactionTypes.Like => new LikeKeyboardRgbAnimation(_controller, @event.ReactionType),
+                        ReactionTypes.Heart => new HeartKeyboardRgbAnimation(_controller, @event.ReactionType, _logger ),
+                        ReactionTypes.Like => new LikeKeyboardRgbAnimation(_controller, @event.ReactionType, _logger),
                         _ => throw new ArgumentOutOfRangeException()
                     };
 

@@ -10,8 +10,8 @@ namespace ProjectAmy.ClientWorker.Rgb.Animations
     public sealed class HeartKeyboardRgbAnimation : GenericRgbAnimation
     {
         
-        public HeartKeyboardRgbAnimation(IRgbController controller, string type)
-            : base(controller, new CorsairLedColor { R = 255 }, type)
+        public HeartKeyboardRgbAnimation(IRgbController controller, string type, ILogger logger)
+            : base(controller, new CorsairLedColor { R = 255 }, type, logger)
         {
         }
 
